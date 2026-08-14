@@ -17,6 +17,8 @@ const ICONS: Record<string, string> = {
   list: "M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
   crown: "M3 8l3 3 6-7 6 7 3-3-2 12H5L3 8z",
   star: "M12 2l3 7 7 1-5.2 5 1.3 7-6.1-3.6L5.9 22l1.3-7L2 10l7-1 3-7z",
+  user: "M12 12a4 4 0 100-8 4 4 0 000 8z M4 20c0-4 3.5-6 8-6s8 2 8 6",
+  edit: "M4 20h4l10-10-4-4L4 16v4z M13.5 5.5l4 4",
 };
 
 /** SSR/CSR에서 동일한 값을 내도록 하는 결정론적 pseudo-random (0~1). Math.random()은 하이드레이션 불일치를 일으킴. */

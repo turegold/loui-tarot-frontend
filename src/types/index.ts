@@ -34,13 +34,23 @@ export interface KakaoLoginResult {
   isNewUser: boolean;
 }
 
+export interface FortuneCardSlot {
+  /** 오늘의 스프레드 테마가 정한 자리 라벨 (예: "과거", "감정", "내면" 등 — 고정 enum 아님) */
+  positionLabel: string;
+  card: Card;
+  isReversed: boolean;
+  interpretation: string;
+}
+
 export interface FortuneResult {
   slug: string;
   nickname: string;
-  card: Card;
-  isReversed: boolean;
   topic: Topic;
-  interpretation: string;
+  /** src/data/spreadThemes.ts의 SpreadTheme.key — 뽑은 시점의 테마를 고정 저장 */
+  spreadThemeKey: string;
+  cards: FortuneCardSlot[];
+  /** 3장을 종합한 전체 흐름 해석. 경우의 수가 너무 많아 캐싱하지 않고 매 요청마다 생성 */
+  overallInterpretation: string;
   createdAt: string;
 }
 

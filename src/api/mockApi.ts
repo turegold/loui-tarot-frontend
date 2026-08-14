@@ -1,4 +1,5 @@
-import { CARDS, getCardById, randomCard } from "@/data/cards";
+import { CARDS, getCardById, randomCard, randomThreeCards } from "@/data/cards";
+import { getDailySpreadTheme, getSpreadThemeByKey, type SpreadTheme } from "@/data/spreadThemes";
 import { calculateChemiScore, chemiTier } from "@/utils/chemiScore";
 import type {
   ApiResponse,
@@ -8,6 +9,7 @@ import type {
   ChemiGuestResponse,
   ChemiRankingEntry,
   ChemiResult,
+  FortuneCardSlot,
   FortuneResult,
   KakaoLoginResult,
   Topic,
@@ -86,6 +88,11 @@ export function mockGeneralInterpretation(card: Card, reversed: boolean): string
 function mockTopicInterpretation(card: Card, reversed: boolean, topic: Topic): string {
   const dir = reversed ? "역방향" : "정방향";
   return `${TOPIC_LABEL[topic]} 기준으로 ${card.nameKr}(${dir}) 카드가 나왔어요. 지금은 그 흐름에 집중해볼 때예요. (AI 해석 연동 전 임시 텍스트)`;
+}
+
+function mockOverallInterpretation(topic: Topic, picks: { card: Card; isReversed: boolean }[], theme: SpreadTheme): string {
+  const flow = picks.map((p) => p.card.nameKr).join(" → ");
+  return `${theme.subtitle}(${theme.labels.join(" · ")}) 흐름으로 보면, ${TOPIC_LABEL[topic]}은(는) ${flow} 순서로 이어지고 있어요. 조급해하지 않아도 애쓴 만큼 곧 흐름이 맑아질 거예요. (AI 해석 연동 전 임시 텍스트)`;
 }
 
 function mockChemiInterpretation(cardA: Card, cardB: Card, score: number): string {
@@ -288,25 +295,44 @@ export async function getChemiRanking(hostSlug: string, page = 1, size = 20): Pr
 
 // ── 개인 카드 뽑기 (카카오 로그인 필수) ──────────────────────────────────────
 
+interface StoredFortuneCard {
+  cardId: number;
+  isReversed: boolean;
+}
+
 interface StoredFortune {
   slug: string;
   userId: number;
-  cardId: number;
-  isReversed: boolean;
   topic: Topic;
+  spreadThemeKey: string;
+  cards: StoredFortuneCard[]; // 항상 3장, 뽑은 순서 = 테마 자리 순서
   createdAt: string;
 }
 
 function toFortuneResult(stored: StoredFortune, nickname: string): FortuneResult | null {
-  const card = getCardById(stored.cardId);
-  if (!card) return null;
+  const theme = getSpreadThemeByKey(stored.spreadThemeKey);
+  const picks = stored.cards.map((c) => {
+    const card = getCardById(c.cardId);
+    return card ? { card, isReversed: c.isReversed } : null;
+  });
+  if (picks.some((p) => p === null)) return null;
+  const resolved = picks as { card: Card; isReversed: boolean }[];
+
+  const cards: FortuneCardSlot[] = resolved.map((p, i) => ({
+    positionLabel: theme.labels[i] ?? theme.labels[theme.labels.length - 1],
+    card: p.card,
+    isReversed: p.isReversed,
+    // (카드, 방향, 주제) 조합 캐시를 그대로 재사용 — 자리(테마 라벨)와 무관 (AI 해석 캐싱 전략.md)
+    interpretation: mockTopicInterpretation(p.card, p.isReversed, stored.topic),
+  }));
+
   return {
     slug: stored.slug,
     nickname,
-    card,
-    isReversed: stored.isReversed,
     topic: stored.topic,
-    interpretation: mockTopicInterpretation(card, stored.isReversed, stored.topic),
+    spreadThemeKey: stored.spreadThemeKey,
+    cards,
+    overallInterpretation: mockOverallInterpretation(stored.topic, resolved, theme),
     createdAt: stored.createdAt,
   };
 }
@@ -316,8 +342,15 @@ export async function createFortune(topic: Topic): Promise<ApiResponse<FortuneRe
   if (!user) return fail("AUTH_UNAUTHORIZED", "로그인이 필요합니다.");
   await delay(700);
 
-  const { card, isReversed } = randomCard();
-  const stored: StoredFortune = { slug: generateSlug(), userId: user.id, cardId: card.id, isReversed, topic, createdAt: new Date().toISOString() };
+  const picks = randomThreeCards();
+  const stored: StoredFortune = {
+    slug: generateSlug(),
+    userId: user.id,
+    topic,
+    spreadThemeKey: getDailySpreadTheme().key,
+    cards: picks.map((p) => ({ cardId: p.card.id, isReversed: p.isReversed })),
+    createdAt: new Date().toISOString(),
+  };
 
   const all = readStore<Record<string, StoredFortune>>(KEYS.fortunes, {});
   all[stored.slug] = stored;

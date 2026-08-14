@@ -106,3 +106,15 @@ export function randomCard(): { card: Card; isReversed: boolean } {
   const card = CARDS[Math.floor(Math.random() * CARDS.length)];
   return { card, isReversed: Math.random() < 0.5 };
 }
+
+/** 서로 다른 카드 3장을 뽑는다 (개인 카드 뽑기 3장 스프레드용) */
+export function randomThreeCards(): { card: Card; isReversed: boolean }[] {
+  const pool = [...CARDS];
+  const picks: { card: Card; isReversed: boolean }[] = [];
+  for (let i = 0; i < 3; i++) {
+    const idx = Math.floor(Math.random() * pool.length);
+    const [card] = pool.splice(idx, 1);
+    picks.push({ card, isReversed: Math.random() < 0.5 });
+  }
+  return picks;
+}

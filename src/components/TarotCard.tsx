@@ -13,8 +13,9 @@ interface CardFaceProps extends CardFaceData {
 }
 
 /**
- * 실제 RWS 카드 이미지가 아직 없어서(후속 작업), imageUrl이 없으면
- * 디자인 킷의 .deck-card-back 그라데이션을 임시 아트워크로 사용한다.
+ * 실제 RWS 카드 앞면 이미지가 아직 없어서(후속 작업), imageUrl이 없으면
+ * .card-art-placeholder 그라데이션을 임시 아트워크로 사용한다.
+ * (카드 뒷면 아트 .deck-card-back과는 별개 — 이건 "앞면 미확보"용 플레이스홀더)
  */
 export function CardFace({ name, imageUrl, reversed, width = 160, height = 224, compact }: CardFaceProps) {
   return (
@@ -31,7 +32,7 @@ export function CardFace({ name, imageUrl, reversed, width = 160, height = 224, 
             style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 16 }}
           />
         ) : (
-          <div className="deck-card-back" style={{ width: "100%", height: "100%" }}>
+          <div className="card-art-placeholder" style={{ width: "100%", height: "100%" }}>
             <Twinkles />
           </div>
         )}

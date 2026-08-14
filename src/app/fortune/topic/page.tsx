@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Blobs, PrimaryButton, Starfield, TopBar, TopicCard } from "@/components/primitives";
-import { LoadingState } from "@/components/LoadingState";
-import { createFortune, getCurrentUser } from "@/api/mockApi";
+import Link from "next/link";
+import { Blobs, Icon, PrimaryButton, Starfield, TopBar, TopicCard } from "@/components/primitives";
+import { getCurrentUser } from "@/api/mockApi";
 import type { Topic } from "@/types";
+
+const PENDING_TOPIC_KEY = "loui-tarot:pendingTopic";
 
 const TOPICS: { key: Topic; icon: string; title: string; desc: string }[] = [
   { key: "COMPREHENSIVE", icon: "moon", title: "종합운", desc: "오늘의 전반적인 흐름" },
@@ -17,30 +19,29 @@ const TOPICS: { key: Topic; icon: string; title: string; desc: string }[] = [
 export default function FortuneTopicPage() {
   const router = useRouter();
   const [topic, setTopic] = useState<Topic | null>(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!getCurrentUser()) router.replace("/");
   }, [router]);
 
-  async function handleDraw() {
+  function handleContinue() {
     if (!topic) return;
-    setLoading(true);
-    const res = await createFortune(topic);
-    if (res.success && res.data) {
-      router.push(`/fortune/${res.data.slug}`);
-      return;
-    }
-    setLoading(false);
+    window.sessionStorage.setItem(PENDING_TOPIC_KEY, topic);
+    router.push("/fortune/spread");
   }
-
-  if (loading) return <LoadingState />;
 
   return (
     <div className="screen">
       <Blobs />
       <Starfield />
-      <TopBar backHref="/home" />
+      <TopBar
+        backHref="/home"
+        right={
+          <Link href="/my" className="iconbtn" aria-label="마이페이지">
+            <Icon name="user" />
+          </Link>
+        }
+      />
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "10px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
         <h2 style={{ fontSize: 24 }}>
           어떤 운을
@@ -53,7 +54,7 @@ export default function FortuneTopicPage() {
           ))}
         </div>
         <div style={{ flex: 1 }} />
-        <PrimaryButton disabled={!topic} onClick={handleDraw}>
+        <PrimaryButton disabled={!topic} onClick={handleContinue}>
           카드 뽑으러 가기
         </PrimaryButton>
       </div>
