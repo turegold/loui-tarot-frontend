@@ -21,7 +21,7 @@ export default function NewChemiDrawPage() {
 
   return (
     <DrawFlow
-      drawHint="카드를 탭하면 바로 결과를 확인해요"
+      drawHint="카드를 탭해서 골라보세요"
       skipNameStep
       onBack={() => router.push("/home")}
       onSubmit={async () => {

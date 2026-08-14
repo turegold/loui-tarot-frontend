@@ -24,7 +24,11 @@ export function DrawFlow({ description, drawHint, onBack, skipNameStep, onSubmit
   const [error, setError] = useState<string | null>(null);
 
   async function handlePick(i: number) {
+    if (picked !== null) return; // 애니메이션 도중 중복 클릭 방지
     setPicked(i);
+    // 카드를 뽑아 드는 연출(drawSpin)이 실제로 재생될 시간을 준 뒤에 로딩으로 넘어간다 —
+    // 곧바로 setStep("loading")을 부르면 같은 틱에 배칭되어 애니메이션 프레임이 아예 그려지지 않았다.
+    await new Promise((resolve) => setTimeout(resolve, 650));
     setStep("loading");
     const errorMessage = await onSubmit(name.trim());
     if (errorMessage) {
@@ -51,22 +55,29 @@ export function DrawFlow({ description, drawHint, onBack, skipNameStep, onSubmit
             <br />
             카드 한 장을 골라보세요
           </h2>
-          <div style={{ display: "flex", position: "relative", height: 220, alignItems: "center" }}>
-            {[-14, 0, 14].map((rot, i) => (
-              <div
-                key={i}
-                onClick={() => handlePick(i)}
-                style={{
-                  marginLeft: i === 0 ? 0 : -30,
-                  transform: `rotate(${rot}deg) ${picked === i ? "translateY(-14px) scale(1.06)" : ""}`,
-                  transition: "transform .3s",
-                  zIndex: picked === i ? 3 : 1,
-                  cursor: "pointer",
-                }}
-              >
-                <DeckCardBack width={120} height={168} />
-              </div>
-            ))}
+          <div style={{ display: "flex", position: "relative", height: 240, alignItems: "center" }}>
+            {[-14, 0, 14].map((rot, i) => {
+              const isPicked = picked === i;
+              const isOther = picked !== null && !isPicked;
+              return (
+                <div
+                  key={i}
+                  onClick={() => handlePick(i)}
+                  style={{
+                    marginLeft: i === 0 ? 0 : -30,
+                    transform: `rotate(${rot}deg) ${isPicked ? "translateY(-32px) scale(1.18)" : isOther ? "translateY(12px) scale(0.94)" : ""}`,
+                    transition: "transform .45s cubic-bezier(.34,1.56,.64,1), opacity .35s ease",
+                    animation: isPicked ? "drawSpin .5s ease" : undefined,
+                    filter: isPicked ? "drop-shadow(0 0 26px var(--lavender-glow))" : undefined,
+                    opacity: isOther ? 0 : 1,
+                    zIndex: isPicked ? 3 : 1,
+                    cursor: picked === null ? "pointer" : "default",
+                  }}
+                >
+                  <DeckCardBack width={120} height={168} />
+                </div>
+              );
+            })}
           </div>
           <p style={{ color: "var(--text-muted)", fontSize: "var(--text-caption)" }}>{drawHint}</p>
           {error && <p style={{ color: "var(--pink-accent)", fontSize: "var(--text-caption)" }}>{error}</p>}

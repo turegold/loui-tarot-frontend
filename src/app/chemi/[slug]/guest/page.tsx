@@ -11,7 +11,7 @@ export default function ChemiGuestPage() {
   return (
     <DrawFlow
       description="케미 결과에 표시될 이름이에요."
-      drawHint="카드를 탭하면 바로 케미 결과를 확인해요"
+      drawHint="카드를 탭해서 골라보세요"
       onBack={() => router.back()}
       onSubmit={async (name) => {
         const res = await createChemiGuestDraw(slug, name);
