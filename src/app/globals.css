@@ -114,17 +114,17 @@ p{margin:0}
 .spread-track{display:flex;gap:12px;overflow-x:auto;padding:6px 20px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;cursor:grab;touch-action:pan-x}
 .spread-track::-webkit-scrollbar{display:none;height:0}
 .spread-track.dragging{cursor:grabbing;scroll-snap-type:none}
-.spread-nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(11,8,18,0.7);border:1px solid var(--border-hairline);display:flex;align-items:center;justify-content:center;color:var(--text-primary);z-index:2;backdrop-filter:blur(4px)}
-.spread-nav-btn.prev{left:4px}
-.spread-nav-btn.next{right:4px}
-.spread-nav-btn:disabled{opacity:0.25;pointer-events:none}
+.spread-nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--lavender-400),var(--lavender-600));display:flex;align-items:center;justify-content:center;color:#fff;z-index:3;box-shadow:var(--shadow-card),0 0 16px rgba(167,139,250,0.45)}
+.spread-nav-btn.prev{left:8px}
+.spread-nav-btn.next{right:8px}
+.spread-nav-btn:disabled{opacity:0.3;pointer-events:none;box-shadow:none;background:var(--bg-card-strong)}
 .spread-slot-row{display:flex;gap:10px;padding:0 20px}
 .spread-slot{flex:1;border-radius:var(--radius-m);border:1.5px dashed var(--border-hairline);min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--text-muted);font-size:var(--text-micro);text-align:center;padding:6px}
 .spread-slot.filled{border-style:solid;border-color:var(--lavender-400);background:var(--bg-card-strong)}
 .mini-flip{perspective:600px;flex-shrink:0;cursor:pointer}
-.mini-flip-inner{position:relative;width:76px;height:112px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.mini-flip-inner{position:relative;width:100px;height:146px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
 .mini-flip.flipped .mini-flip-inner{transform:rotateY(180deg)}
-.mini-face{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
+.mini-face{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
 .mini-face.back{background:#0B0812 url('/cards/card-back.png') center/cover no-repeat}
 .mini-face.front{background:var(--bg-card-strong);border:1px solid var(--lavender-400);transform:rotateY(180deg)}
 .mini-flip.used{opacity:0.2;pointer-events:none}

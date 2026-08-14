@@ -10,7 +10,7 @@ import type { Topic } from "@/types";
 
 const SPREAD_SIZE = 24;
 const PENDING_TOPIC_KEY = "loui-tarot:pendingTopic";
-const SCROLL_STEP = 260;
+const SCROLL_STEP = 320;
 const DRAG_THRESHOLD = 4;
 
 function isTopic(v: string | null): v is Topic {
@@ -160,10 +160,10 @@ export default function FortuneSpreadPage() {
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1 }}>
         <div className="spread-nav">
           <button className="spread-nav-btn prev" disabled={!canScrollLeft} onClick={() => scrollByStep(-1)} aria-label="이전 카드 보기">
-            <Icon name="chevronLeft" size={18} />
+            <Icon name="chevronLeft" size={22} />
           </button>
           <button className="spread-nav-btn next" disabled={!canScrollRight} onClick={() => scrollByStep(1)} aria-label="다음 카드 보기">
-            <Icon name="chevronRight" size={18} />
+            <Icon name="chevronRight" size={22} />
           </button>
           <div ref={trackRef} className="spread-track" onPointerDown={handlePointerDown} onScroll={updateScrollState}>
             {Array.from({ length: SPREAD_SIZE }).map((_, i) => (
@@ -177,7 +177,7 @@ export default function FortuneSpreadPage() {
                     <Twinkles n={2} />
                   </div>
                   <div className="mini-face front">
-                    <Icon name="sparkle" size={16} color="var(--lavender-300)" />
+                    <Icon name="sparkle" size={22} color="var(--lavender-300)" />
                   </div>
                 </div>
               </div>
