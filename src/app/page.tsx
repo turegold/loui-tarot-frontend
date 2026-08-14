@@ -1,69 +1,43 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
+import { Blobs, DeckCardBack, Icon, Starfield } from "@/components/primitives";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div
+      className="screen"
+      style={{ background: "radial-gradient(120% 80% at 50% -10%, rgba(167,139,250,0.35), transparent), var(--bg-void)" }}
+    >
+      <Blobs />
+      <Starfield />
+      <div
+        className="screen-scroll"
+        style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "80px 28px 40px", gap: 24, textAlign: "center" }}
+      >
+        <div className="badge-pill">
+          <Icon name="sparkle" size={13} />
+          오늘의 운세 · 궁합
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <h1 style={{ fontSize: 34, lineHeight: 1.35, color: "var(--text-primary)" }}>
+          카드 한 장으로
+          <br />
+          우리 둘의 케미를
+          <br />
+          확인해보세요
+        </h1>
+        <p style={{ fontSize: "var(--text-body)", color: "var(--text-secondary)", maxWidth: 300 }}>
+          이름만 입력하고 카드를 뽑으면, 친구에게 공유해서 케미 궁합을 바로 확인할 수 있어요.
+        </p>
+        <DeckCardBack width={140} height={196} style={{ animation: "floatY 4s ease-in-out infinite", margin: "12px 0" }} />
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
+          <Link href="/chemi/new" className="btn-primary">
+            <Icon name="sparkle" size={18} color="#fff" />
+            케미 뽑으러 가기
+          </Link>
+          <Link href="/login" className="btn-ghost">
+            카카오로 시작하기 (개인 카드 뽑기)
+          </Link>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
