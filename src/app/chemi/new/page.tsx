@@ -1,19 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DrawFlow } from "@/components/DrawFlow";
-import { createChemiDraw } from "@/api/mockApi";
+import { createChemiDraw, getCurrentUser } from "@/api/mockApi";
 
 export default function NewChemiDrawPage() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!getCurrentUser()) {
+      router.replace("/");
+      return;
+    }
+    setReady(true);
+  }, [router]);
+
+  if (!ready) return null;
 
   return (
     <DrawFlow
-      description="결과 카드와 공유 링크에 표시될 이름이에요."
       drawHint="카드를 탭하면 바로 결과를 확인해요"
-      onBack={() => router.push("/")}
-      onSubmit={async (name) => {
-        const res = await createChemiDraw(name);
+      skipNameStep
+      onBack={() => router.push("/home")}
+      onSubmit={async () => {
+        const res = await createChemiDraw();
         if (res.success && res.data) {
           router.push(`/chemi/${res.data.slug}`);
           return;

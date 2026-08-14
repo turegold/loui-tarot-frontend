@@ -20,7 +20,7 @@ export default function FortuneTopicPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!getCurrentUser()) router.replace("/login");
+    if (!getCurrentUser()) router.replace("/");
   }, [router]);
 
   async function handleDraw() {
@@ -40,7 +40,7 @@ export default function FortuneTopicPage() {
     <div className="screen">
       <Blobs />
       <Starfield />
-      <TopBar backHref="/" />
+      <TopBar backHref="/home" />
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "10px 24px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
         <h2 style={{ fontSize: 24 }}>
           어떤 운을

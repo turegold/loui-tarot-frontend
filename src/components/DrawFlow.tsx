@@ -7,16 +7,18 @@ import { LoadingState } from "./LoadingState";
 type Step = "name" | "draw" | "loading";
 
 interface DrawFlowProps {
-  description: string;
+  description?: string;
   drawHint: string;
   onBack?: () => void;
-  /** 카드를 고른 직후 호출됨. 실패 시 에러 메시지를 반환하면 이름 입력 단계로 되돌아간다. 성공 시 라우팅은 호출자가 담당. */
+  /** 로그인된 방장 흐름처럼 이름을 이미 알고 있을 때 이름 입력 단계를 건너뛴다 */
+  skipNameStep?: boolean;
+  /** 카드를 고른 직후 호출됨. 실패 시 에러 메시지를 반환하면 이전 단계로 되돌아간다. 성공 시 라우팅은 호출자가 담당. */
   onSubmit: (name: string) => Promise<string | void>;
 }
 
 /** ②이름 입력 + ③카드 뽑기 화면 — 방장(케미 뽑기)과 게스트 뽑기가 동일 구조라 공용 컴포넌트로 뺐다 */
-export function DrawFlow({ description, drawHint, onBack, onSubmit }: DrawFlowProps) {
-  const [step, setStep] = useState<Step>("name");
+export function DrawFlow({ description, drawHint, onBack, skipNameStep, onSubmit }: DrawFlowProps) {
+  const [step, setStep] = useState<Step>(skipNameStep ? "draw" : "name");
   const [name, setName] = useState("");
   const [picked, setPicked] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export function DrawFlow({ description, drawHint, onBack, onSubmit }: DrawFlowPr
     const errorMessage = await onSubmit(name.trim());
     if (errorMessage) {
       setError(errorMessage);
-      setStep("name");
+      setStep(skipNameStep ? "draw" : "name");
       setPicked(null);
     }
   }
@@ -39,7 +41,7 @@ export function DrawFlow({ description, drawHint, onBack, onSubmit }: DrawFlowPr
       <div className="screen">
         <Blobs />
         <Starfield />
-        <TopBar onBack={() => setStep("name")} />
+        <TopBar onBack={skipNameStep ? onBack : () => setStep("name")} />
         <div
           className="screen-scroll"
           style={{ position: "relative", zIndex: 1, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 28, textAlign: "center" }}
@@ -67,6 +69,7 @@ export function DrawFlow({ description, drawHint, onBack, onSubmit }: DrawFlowPr
             ))}
           </div>
           <p style={{ color: "var(--text-muted)", fontSize: "var(--text-caption)" }}>{drawHint}</p>
+          {error && <p style={{ color: "var(--pink-accent)", fontSize: "var(--text-caption)" }}>{error}</p>}
         </div>
       </div>
     );

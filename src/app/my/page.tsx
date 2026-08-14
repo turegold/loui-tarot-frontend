@@ -20,7 +20,7 @@ export default function MyPage() {
 
   useEffect(() => {
     if (!getCurrentUser()) {
-      router.replace("/login");
+      router.replace("/");
       return;
     }
     listMyFortunes().then((res) => {
@@ -32,7 +32,7 @@ export default function MyPage() {
     <div className="screen">
       <Blobs />
       <Starfield />
-      <TopBar title="내 기록" onBack={() => router.push("/fortune/topic")} />
+      <TopBar title="내 기록" onBack={() => router.push("/home")} />
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "8px 20px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
         {rows?.length === 0 && (
           <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-body)", textAlign: "center", marginTop: 40 }}>

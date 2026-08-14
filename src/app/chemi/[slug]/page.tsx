@@ -71,7 +71,7 @@ export default function ChemiDrawPage() {
       <div className="screen">
         <Blobs />
         <Starfield />
-        <TopBar backHref="/" />
+        <TopBar backHref="/home" />
         <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "0 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <span className="badge-pill">{draw.nickname}님의 카드</span>
           <CardFace name={draw.card.nameKr} reversed={draw.isReversed} />

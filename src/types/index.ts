@@ -28,6 +28,12 @@ export interface User {
   profileImageUrl?: string;
 }
 
+export interface KakaoLoginResult {
+  user: User;
+  /** 최초 가입이면 true — 온보딩의 닉네임 설정 화면을 보여줄지 프론트가 이 값으로 판단 */
+  isNewUser: boolean;
+}
+
 export interface FortuneResult {
   slug: string;
   nickname: string;

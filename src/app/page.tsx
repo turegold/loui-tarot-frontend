@@ -1,7 +1,12 @@
-import Link from "next/link";
-import { Blobs, DeckCardBack, Icon, Starfield } from "@/components/primitives";
+"use client";
 
-export default function LandingPage() {
+import { useRouter } from "next/navigation";
+import { Blobs, DeckCardBack, KakaoButton, Starfield } from "@/components/primitives";
+import { kakaoLoginMock } from "@/api/mockApi";
+
+export default function OnboardingPage() {
+  const router = useRouter();
+
   return (
     <div
       className="screen"
@@ -11,31 +16,27 @@ export default function LandingPage() {
       <Starfield />
       <div
         className="screen-scroll"
-        style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "80px 28px 40px", gap: 24, textAlign: "center" }}
+        style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "100px 28px 40px", gap: 24, textAlign: "center" }}
       >
-        <div className="badge-pill">
-          <Icon name="sparkle" size={13} />
-          오늘의 운세 · 궁합
-        </div>
-        <h1 style={{ fontSize: 34, lineHeight: 1.35, color: "var(--text-primary)" }}>
-          카드 한 장으로
-          <br />
-          우리 둘의 케미를
-          <br />
-          확인해보세요
-        </h1>
+        <DeckCardBack width={140} height={196} style={{ animation: "floatY 4s ease-in-out infinite" }} />
+        <h1 style={{ fontSize: 30, color: "var(--text-primary)" }}>루이 타로</h1>
         <p style={{ fontSize: "var(--text-body)", color: "var(--text-secondary)", maxWidth: 300 }}>
-          이름만 입력하고 카드를 뽑으면, 친구에게 공유해서 케미 궁합을 바로 확인할 수 있어요.
+          카드 한 장으로 오늘의 운세와 우리 둘의 케미를 확인해보세요.
         </p>
-        <DeckCardBack width={140} height={196} style={{ animation: "floatY 4s ease-in-out infinite", margin: "12px 0" }} />
-        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
-          <Link href="/chemi/new" className="btn-primary">
-            <Icon name="sparkle" size={18} color="#fff" />
-            케미 뽑으러 가기
-          </Link>
-          <Link href="/login" className="btn-ghost">
-            카카오로 시작하기 (개인 카드 뽑기)
-          </Link>
+        <div style={{ flex: 1 }} />
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
+          <KakaoButton
+            onClick={async () => {
+              // 실제 카카오 OAuth 연동 전까지는 mock 로그인으로 세션만 흉내낸다 (후속 작업)
+              const res = await kakaoLoginMock();
+              if (res.success && res.data) {
+                router.push(res.data.isNewUser ? "/onboarding/nickname" : "/home");
+              }
+            }}
+          >
+            카카오로 시작하기
+          </KakaoButton>
+          <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>로그인 시 이용약관 및 개인정보 처리방침에 동의합니다</span>
         </div>
       </div>
     </div>

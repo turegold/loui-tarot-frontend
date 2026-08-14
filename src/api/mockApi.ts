@@ -9,6 +9,7 @@ import type {
   ChemiRankingEntry,
   ChemiResult,
   FortuneResult,
+  KakaoLoginResult,
   Topic,
   User,
 } from "@/types";
@@ -98,11 +99,23 @@ export function getCurrentUser(): User | null {
   return readStore<User | null>(KEYS.user, null);
 }
 
-export async function kakaoLoginMock(nickname = "타로러"): Promise<ApiResponse<User>> {
+export async function kakaoLoginMock(defaultNickname = "타로러"): Promise<ApiResponse<KakaoLoginResult>> {
   await delay(400);
-  const user: User = { id: 1, nickname };
+  const existing = readStore<User | null>(KEYS.user, null);
+  if (existing) return ok({ user: existing, isNewUser: false });
+
+  const user: User = { id: 1, nickname: defaultNickname };
   writeStore(KEYS.user, user);
-  return ok(user);
+  return ok({ user, isNewUser: true });
+}
+
+export async function updateMe(nickname: string): Promise<ApiResponse<User>> {
+  const current = getCurrentUser();
+  if (!current) return fail("AUTH_UNAUTHORIZED", "로그인이 필요합니다.");
+  await delay(300);
+  const updated: User = { ...current, nickname };
+  writeStore(KEYS.user, updated);
+  return ok(updated);
 }
 
 export function logoutMock() {
@@ -127,10 +140,12 @@ export async function getCard(cardId: number): Promise<ApiResponse<CardDetail>> 
   });
 }
 
-// ── 케미 뽑기 (비로그인) ────────────────────────────────────────────────────
+// ── 케미 뽑기 (방장은 로그인, 게스트는 비로그인) ───────────────────────────────
 
 interface StoredChemiDraw {
   slug: string;
+  /** 로그인한 방장일 때만 채워짐 (홈 화면에서 시작). 게스트/체인 draw는 undefined */
+  userId?: number;
   nickname: string;
   cardId: number;
   isReversed: boolean;
@@ -158,17 +173,24 @@ function toChemiDraw(stored: StoredChemiDraw): ChemiDraw | null {
   };
 }
 
-export async function createChemiDraw(nickname: string): Promise<ApiResponse<ChemiDraw>> {
+export async function createChemiDraw(): Promise<ApiResponse<ChemiDraw>> {
+  const user = getCurrentUser();
+  if (!user) return fail("AUTH_UNAUTHORIZED", "로그인이 필요합니다.");
   await delay(600);
+
   const { card, isReversed } = randomCard();
-  const stored: StoredChemiDraw = { slug: generateSlug(), nickname, cardId: card.id, isReversed, createdAt: new Date().toISOString() };
+  const stored: StoredChemiDraw = {
+    slug: generateSlug(),
+    userId: user.id,
+    nickname: user.nickname, // 로그인 상태라 이름 입력 없이 계정 닉네임을 그대로 사용
+    cardId: card.id,
+    isReversed,
+    createdAt: new Date().toISOString(),
+  };
 
   const all = readStore<Record<string, StoredChemiDraw>>(KEYS.chemiDraws, {});
   all[stored.slug] = stored;
   writeStore(KEYS.chemiDraws, all);
-
-  const owned = readStore<string[]>(KEYS.ownedChemiSlugs, []);
-  writeStore(KEYS.ownedChemiSlugs, [...owned, stored.slug]);
 
   return ok(toChemiDraw(stored)!);
 }
@@ -181,8 +203,16 @@ export async function getChemiDraw(slug: string): Promise<ApiResponse<ChemiDraw>
   return ok(toChemiDraw(stored)!);
 }
 
-/** 이 브라우저에서 만든(=방장인) draw인지 — 서버에 로그인이 없어 localStorage로 소유 여부를 판단 */
+/**
+ * 이 draw의 "방장"이 지금 보고 있는 나인지 판단한다.
+ * - 로그인 계정으로 만든 draw는 draw.userId와 현재 로그인 유저를 비교 (기기가 바뀌어도 유효)
+ * - 게스트가 재공유해서 만든 체인 draw는 계정이 없어 localStorage 소유 기록으로 대체 판단
+ */
 export function isOwnedChemiSlug(slug: string): boolean {
+  const draws = readStore<Record<string, StoredChemiDraw>>(KEYS.chemiDraws, {});
+  const draw = draws[slug];
+  const user = getCurrentUser();
+  if (draw?.userId && user && draw.userId === user.id) return true;
   return readStore<string[]>(KEYS.ownedChemiSlugs, []).includes(slug);
 }
 
