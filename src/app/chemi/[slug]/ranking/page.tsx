@@ -52,7 +52,23 @@ export default function ChemiRankingPage() {
             {rows?.map((r, i) => (
               <div key={i} className="progress-list-row">
                 <span style={{ width: 22, textAlign: "center", color: "var(--lavender-300)", fontFamily: "var(--font-display)" }}>{i + 1}</span>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--bg-card-strong)" }} />
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg,var(--lavender-400),var(--lavender-600))",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontFamily: "var(--font-display)",
+                    fontSize: "var(--text-caption)",
+                    flexShrink: 0,
+                  }}
+                >
+                  {r.guestNickname.slice(0, 1)}
+                </div>
                 <span style={{ flex: 1, fontSize: "var(--text-body)" }}>{r.guestNickname}</span>
                 <span className="badge-pill">{r.score}점</span>
               </div>
