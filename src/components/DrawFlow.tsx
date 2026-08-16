@@ -12,12 +12,14 @@ interface DrawFlowProps {
   onBack?: () => void;
   /** 로그인된 방장 흐름처럼 이름을 이미 알고 있을 때 이름 입력 단계를 건너뛴다 */
   skipNameStep?: boolean;
+  /** 이름 입력 글자 수 제한(기본 30) — 케미 순위/별자리 뷰처럼 좁은 자리에 이름이 표시되는 곳은 더 짧게 제한한다 */
+  nameMaxLength?: number;
   /** 카드를 고른 직후 호출됨. 실패 시 에러 메시지를 반환하면 이전 단계로 되돌아간다. 성공 시 라우팅은 호출자가 담당. */
   onSubmit: (name: string) => Promise<string | void>;
 }
 
 /** ②이름 입력 + ③카드 뽑기 화면 — 방장(케미 뽑기)과 게스트 뽑기가 동일 구조라 공용 컴포넌트로 뺐다 */
-export function DrawFlow({ description, drawHint, onBack, skipNameStep, onSubmit }: DrawFlowProps) {
+export function DrawFlow({ description, drawHint, onBack, skipNameStep, nameMaxLength = 30, onSubmit }: DrawFlowProps) {
   const [step, setStep] = useState<Step>(skipNameStep ? "draw" : "name");
   const [name, setName] = useState("");
   const [picked, setPicked] = useState<number | null>(null);
@@ -94,7 +96,7 @@ export function DrawFlow({ description, drawHint, onBack, skipNameStep, onSubmit
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
         <h2 style={{ fontSize: 26, marginTop: 20 }}>어떻게 불러드릴까요?</h2>
         <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-body)" }}>{description}</p>
-        <TextInput placeholder="이름 또는 별명" value={name} onChange={(e) => setName(e.target.value)} maxLength={30} />
+        <TextInput placeholder="이름 또는 별명" value={name} onChange={(e) => setName(e.target.value)} maxLength={nameMaxLength} />
         {error && <p style={{ color: "var(--pink-accent)", fontSize: "var(--text-caption)" }}>{error}</p>}
         <div style={{ flex: 1 }} />
         <PrimaryButton disabled={!name.trim()} onClick={() => setStep("draw")}>
