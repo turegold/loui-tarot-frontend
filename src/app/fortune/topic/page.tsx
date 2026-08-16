@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, Icon, PrimaryButton, Starfield, TopBar, TopicCard } from "@/components/primitives";
-import { getCurrentUser } from "@/api/mockApi";
+import { getCurrentUser } from "@/api/client";
 import type { Topic } from "@/types";
 
 const PENDING_TOPIC_KEY = "loui-tarot:pendingTopic";

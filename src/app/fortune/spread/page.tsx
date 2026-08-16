@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import { useRouter } from "next/navigation";
 import { Blobs, Icon, Starfield, TopBar, Twinkles } from "@/components/primitives";
 import { LoadingState } from "@/components/LoadingState";
-import { createFortune, getCurrentUser } from "@/api/mockApi";
+import { createFortune, getCurrentUser } from "@/api/client";
 import { getDailySpreadTheme } from "@/data/spreadThemes";
 import type { Topic } from "@/types";
 
