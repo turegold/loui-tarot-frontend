@@ -5,6 +5,7 @@ import type {
   ChemiDraw,
   ChemiGuestResponse,
   ChemiRankingEntry,
+  ChemiSummary,
   FortuneResult,
   FortuneSummary,
   KakaoLoginResult,
@@ -207,6 +208,17 @@ export async function getChemiVs(_hostSlug: string, guestSlug: string): Promise<
 
 export function getChemiRanking(hostSlug: string, page = 1, size = 20): Promise<ApiResponse<ChemiRankingEntry[]>> {
   return apiFetch<ChemiRankingEntry[]>(`/chemi-draws/${hostSlug}/ranking?page=${page}&size=${size}`);
+}
+
+/**
+ * 마이페이지 "내 기록"의 케미 뽑기 목록. 다른 기기/브라우저에서 봐도 내 기록이 맞으니, 여기서
+ * 받아온 slug는 이 브라우저의 소유 목록(markOwned)에도 다시 기록해둔다 — 그래야 이 목록에서
+ * 눌러 들어간 /chemi/{slug}가 로컬 소유 기록이 없던 새 브라우저에서도 방장 화면으로 뜬다.
+ */
+export async function listMyChemiDraws(page = 1, size = 20): Promise<ApiResponse<ChemiSummary[]>> {
+  const res = await apiFetch<ChemiSummary[]>(`/users/me/chemi-draws?page=${page}&size=${size}`);
+  if (res.success && res.data) res.data.forEach((c) => markOwned(c.slug));
+  return res;
 }
 
 // ── 개인 카드 뽑기 (카카오 로그인 필수) ──────────────────────────────────────

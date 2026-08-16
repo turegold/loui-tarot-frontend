@@ -93,6 +93,14 @@ export interface ChemiResult {
   interpretation: string;
 }
 
+/** GET /users/me/chemi-draws 목록 항목 — 로그인 방장으로 뽑은 케미 기록(해석 텍스트 없음). */
+export interface ChemiSummary {
+  slug: string;
+  card: CardBrief;
+  isReversed: boolean;
+  createdAt: string;
+}
+
 export interface ChemiGuestResponse {
   guestDraw: ChemiDraw;
   hostDraw: ChemiDraw;
