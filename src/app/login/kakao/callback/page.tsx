@@ -10,16 +10,12 @@ import { LoadingState } from "@/components/LoadingState";
 function KakaoCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const code = searchParams.get("code");
   const ranRef = useRef(false); // 인가코드는 1회용이라, StrictMode/재렌더로 두 번 소모되는 걸 막는다
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (ranRef.current) return;
-    const code = searchParams.get("code");
-    if (!code) {
-      setError("카카오 로그인이 취소됐어요.");
-      return;
-    }
+    if (!code || ranRef.current) return;
     ranRef.current = true;
     exchangeKakaoCode(code).then((res) => {
       if (res.success && res.data) {
@@ -28,12 +24,12 @@ function KakaoCallbackInner() {
       }
       setError(res.error?.message ?? "카카오 로그인에 실패했어요.");
     });
-  }, [searchParams, router]);
+  }, [code, router]);
 
-  if (error) {
+  if (!code || error) {
     return (
       <div className="screen" style={{ alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center", gap: 12 }}>
-        <p style={{ color: "var(--text-secondary)" }}>{error}</p>
+        <p style={{ color: "var(--text-secondary)" }}>{error ?? "카카오 로그인이 취소됐어요."}</p>
         <Link href="/" className="btn-text">
           다시 시도하기
         </Link>
