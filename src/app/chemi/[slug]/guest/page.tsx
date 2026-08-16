@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { DrawFlow } from "@/components/DrawFlow";
-import { createChemiGuestDraw } from "@/api/mockApi";
+import { createChemiGuestDraw } from "@/api/client";
 
 export default function ChemiGuestPage() {
   const { slug } = useParams<{ slug: string }>();

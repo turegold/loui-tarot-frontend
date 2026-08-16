@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Blobs, Icon, Starfield, TopBar } from "@/components/primitives";
 import { ConstellationMap } from "@/components/ConstellationMap";
-import { getChemiRanking } from "@/api/mockApi";
+import { getChemiRanking } from "@/api/client";
 import type { ChemiRankingEntry } from "@/types";
 
 type View = "list" | "map";

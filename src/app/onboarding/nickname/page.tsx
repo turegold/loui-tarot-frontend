@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Blobs, PrimaryButton, Starfield, TextInput } from "@/components/primitives";
-import { getCurrentUser, updateMe } from "@/api/mockApi";
+import { getCurrentUser, updateMe } from "@/api/client";
 
 /** 최초 카카오 로그인 시 1회 노출 — 카카오 프로필 닉네임을 그대로 쓸지, 바꿀지 확인하는 화면 */
 export default function OnboardingNicknamePage() {

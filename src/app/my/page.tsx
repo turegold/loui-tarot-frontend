@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, GhostButton, Icon, Starfield, TopBar } from "@/components/primitives";
-import { getCurrentUser, listMyFortunes, logoutMock, updateMe } from "@/api/mockApi";
-import type { FortuneResult, Topic, User } from "@/types";
+import { getCurrentUser, listMyFortunes, logout, updateMe } from "@/api/client";
+import type { FortuneSummary, Topic, User } from "@/types";
 
 const TOPIC_LABEL: Record<Topic, string> = {
   COMPREHENSIVE: "종합운",
@@ -17,7 +17,7 @@ const TOPIC_LABEL: Record<Topic, string> = {
 export default function MyPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [rows, setRows] = useState<FortuneResult[] | null>(null);
+  const [rows, setRows] = useState<FortuneSummary[] | null>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -118,8 +118,8 @@ export default function MyPage() {
         </div>
 
         <GhostButton
-          onClick={() => {
-            logoutMock();
+          onClick={async () => {
+            await logout();
             router.push("/");
           }}
         >

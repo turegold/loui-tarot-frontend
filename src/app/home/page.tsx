@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, GhostButton, Icon, Starfield, TopBar } from "@/components/primitives";
-import { getCurrentUser, logoutMock } from "@/api/mockApi";
+import { getCurrentUser, logout } from "@/api/client";
 import type { User } from "@/types";
 
 function HomeCard({ href, icon, title, desc }: { href: string; icon: string; title: string; desc: string }) {
@@ -69,8 +69,8 @@ export default function HomePage() {
             내 기록 보기
           </Link>
           <GhostButton
-            onClick={() => {
-              logoutMock();
+            onClick={async () => {
+              await logout();
               router.push("/");
             }}
           >

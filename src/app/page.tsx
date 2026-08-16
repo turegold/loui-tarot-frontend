@@ -1,12 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Blobs, DeckCardBack, KakaoButton, Starfield } from "@/components/primitives";
-import { kakaoLoginMock } from "@/api/mockApi";
+
+function kakaoLoginUrl(): string {
+  const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
+  const redirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
+  return `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri ?? "")}&response_type=code`;
+}
 
 export default function OnboardingPage() {
-  const router = useRouter();
-
   return (
     <div
       className="screen"
@@ -25,17 +27,7 @@ export default function OnboardingPage() {
         </p>
         <div style={{ flex: 1 }} />
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
-          <KakaoButton
-            onClick={async () => {
-              // 실제 카카오 OAuth 연동 전까지는 mock 로그인으로 세션만 흉내낸다 (후속 작업)
-              const res = await kakaoLoginMock();
-              if (res.success && res.data) {
-                router.push(res.data.isNewUser ? "/onboarding/nickname" : "/home");
-              }
-            }}
-          >
-            카카오로 시작하기
-          </KakaoButton>
+          <KakaoButton onClick={() => window.location.assign(kakaoLoginUrl())}>카카오로 시작하기</KakaoButton>
           <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>로그인 시 이용약관 및 개인정보 처리방침에 동의합니다</span>
         </div>
       </div>

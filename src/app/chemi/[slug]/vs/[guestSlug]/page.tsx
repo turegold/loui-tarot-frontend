@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Blobs, GhostButton, Icon, Starfield, TopBar } from "@/components/primitives";
 import { ScoreLink } from "@/components/TarotCard";
 import { LoadingState } from "@/components/LoadingState";
-import { getChemiVs } from "@/api/mockApi";
+import { getChemiVs } from "@/api/client";
 import type { ChemiGuestResponse } from "@/types";
 
 export default function ChemiVsPage() {

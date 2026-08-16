@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Blobs, Icon, Starfield, TopBar } from "@/components/primitives";
 import { CardFace } from "@/components/TarotCard";
 import { LoadingState } from "@/components/LoadingState";
-import { getChemiDraw, isOwnedChemiSlug } from "@/api/mockApi";
+import { getChemiDraw, isOwnedChemiSlug } from "@/api/client";
 import type { ChemiDraw } from "@/types";
 
 function CopyShareButton({ url }: { url: string }) {

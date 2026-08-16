@@ -6,8 +6,7 @@ import Link from "next/link";
 import { Blobs, GhostButton, Icon, PrimaryButton, Starfield, TopBar } from "@/components/primitives";
 import { CardFace } from "@/components/TarotCard";
 import { LoadingState } from "@/components/LoadingState";
-import { getFortune } from "@/api/mockApi";
-import { getSpreadThemeByKey } from "@/data/spreadThemes";
+import { getFortune } from "@/api/client";
 import type { FortuneResult, Topic } from "@/types";
 
 const TOPIC_META: Record<Topic, { icon: string; title: string }> = {
@@ -50,7 +49,10 @@ export default function FortuneResultPage() {
   if (!result) return <LoadingState message="불러오는 중이에요…" />;
 
   const meta = TOPIC_META[result.topic];
-  const theme = getSpreadThemeByKey(result.spreadThemeKey);
+  // 서버가 이미 뽑힌 시점의 테마로 완성된 positionLabel을 카드마다 내려주므로, 여기서 다시
+  // 테마 key로 라벨을 재계산하지 않는다 — 로컬 테마 카탈로그의 key가 백엔드와 완전히 같다는
+  // 보장이 없어서(둘 다 라벨/순서는 같지만 key 문자열 일부가 다름), 응답 그대로 쓰는 게 안전하다.
+  const themeLabels = result.cards.map((c) => c.positionLabel).join(" · ");
 
   return (
     <div className="screen">
@@ -67,7 +69,7 @@ export default function FortuneResultPage() {
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "0 20px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
         <span className="badge-pill">
           <Icon name={meta.icon} size={13} />
-          {meta.title} · {theme.labels.join(" · ")}
+          {meta.title} · {themeLabels}
         </span>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>

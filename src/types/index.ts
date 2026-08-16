@@ -22,6 +22,16 @@ export interface CardDetail extends Card {
   reversedInterpretation: string;
 }
 
+/**
+ * 케미/개인 카드 뽑기 응답에 카드를 요약해서 실을 때 쓰는 최소 형태 — 백엔드의
+ * CardBriefResponse(id, nameKr, imageUrl)와 1:1. GET /cards의 전체 Card와는 다른 타입이다.
+ */
+export interface CardBrief {
+  id: number;
+  nameKr: string;
+  imageUrl: string;
+}
+
 export interface User {
   id: number;
   nickname: string;
@@ -35,18 +45,20 @@ export interface KakaoLoginResult {
 }
 
 export interface FortuneCardSlot {
-  /** 오늘의 스프레드 테마가 정한 자리 라벨 (예: "과거", "감정", "내면" 등 — 고정 enum 아님) */
+  /** 그날의 스프레드 테마가 정한 자리 라벨(서버가 이미 완성된 문자열로 내려줌, 예: "과거", "감정") */
   positionLabel: string;
-  card: Card;
+  card: CardBrief;
   isReversed: boolean;
-  interpretation: string;
+  /** 목록(GET /users/me/fortunes)에서는 null — 상세(GET /fortunes/{slug})에서만 채워짐 */
+  interpretation: string | null;
 }
 
 export interface FortuneResult {
   slug: string;
-  nickname: string;
+  /** POST 응답(방금 뽑은 본인)엔 없고, GET 응답(공유 링크로 조회)에만 채워짐 */
+  nickname: string | null;
   topic: Topic;
-  /** src/data/spreadThemes.ts의 SpreadTheme.key — 뽑은 시점의 테마를 고정 저장 */
+  /** 백엔드 SpreadTheme.key — 뽑은 시점의 테마를 고정 저장 (참고/통계용, 라벨은 이미 cards[].positionLabel에 포함됨) */
   spreadThemeKey: string;
   cards: FortuneCardSlot[];
   /** 3장을 종합한 전체 흐름 해석. 경우의 수가 너무 많아 캐싱하지 않고 매 요청마다 생성 */
@@ -54,14 +66,26 @@ export interface FortuneResult {
   createdAt: string;
 }
 
+/** GET /users/me/fortunes 목록 항목 — 해석 텍스트를 담지 않는 가벼운 형태(cards[].interpretation은 null). */
+export interface FortuneSummary {
+  slug: string;
+  topic: Topic;
+  cards: FortuneCardSlot[];
+  createdAt: string;
+}
+
 export interface ChemiDraw {
   slug: string;
   nickname: string;
-  card: Card;
+  card: CardBrief;
   isReversed: boolean;
-  interpretation: string;
+  /** 다른 draw에 embed될 때(hostDraw 자리)는 null로 내려오기도 함 */
+  interpretation: string | null;
   shareUrl: string;
   createdAt: string;
+  /** 이 draw가 게스트로 참여한 적 있을 때만 채워짐(GET 조회 시). 방장 draw이거나 상대가 아직 없으면 null */
+  hostDraw?: ChemiDraw | null;
+  chemi?: ChemiResult | null;
 }
 
 export interface ChemiResult {
@@ -77,7 +101,7 @@ export interface ChemiGuestResponse {
 
 export interface ChemiRankingEntry {
   guestNickname: string;
-  guestCard: Card;
+  guestCard: CardBrief;
   score: number;
 }
 

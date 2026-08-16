@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DrawFlow } from "@/components/DrawFlow";
-import { createChemiDraw, getCurrentUser } from "@/api/mockApi";
+import { createChemiDraw, getCurrentUser } from "@/api/client";
 
 export default function NewChemiDrawPage() {
   const router = useRouter();
