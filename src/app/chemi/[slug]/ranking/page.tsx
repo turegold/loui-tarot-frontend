@@ -31,7 +31,7 @@ export default function ChemiRankingPage() {
     <div className="screen">
       <Blobs />
       <Starfield />
-      <TopBar title="케미 순위" onBack={() => router.push(`/chemi/${slug}`)} />
+      <TopBar title="케미 순위" onBack={() => router.push("/home")} />
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "8px 20px 32px", display: "flex", flexDirection: "column", gap: 16 }}>
         <div className="tab-row">
           <button className={"tab-btn" + (view === "list" ? " active" : "")} onClick={() => setView("list")}>

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, Icon, Starfield, TopBar } from "@/components/primitives";
 import { CardFace } from "@/components/TarotCard";
 import { LoadingState } from "@/components/LoadingState";
-import { getChemiDraw, isOwnedChemiSlug } from "@/api/client";
+import { getChemiDraw, getMyGuestDrawSlug, isOwnedChemiSlug } from "@/api/client";
 import type { ChemiDraw } from "@/types";
 
 function CopyShareButton({ url }: { url: string }) {
@@ -32,11 +32,20 @@ function CopyShareButton({ url }: { url: string }) {
 
 export default function ChemiDrawPage() {
   const { slug } = useParams<{ slug: string }>();
+  const router = useRouter();
   const [draw, setDraw] = useState<ChemiDraw | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    // 이 브라우저가 이 host에게 이미 게스트로 뽑아준 적이 있으면(재방문), 다시 뽑기를 유도하지
+    // 않고 그때 만들어진 케미 결과로 바로 보낸다.
+    const existingGuestSlug = getMyGuestDrawSlug(slug);
+    if (existingGuestSlug && !isOwnedChemiSlug(slug)) {
+      router.replace(`/chemi/${slug}/vs/${existingGuestSlug}`);
+      return;
+    }
+
     let active = true;
     getChemiDraw(slug).then((res) => {
       if (!active) return;
@@ -50,7 +59,7 @@ export default function ChemiDrawPage() {
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [slug, router]);
 
   if (notFound) {
     return (

@@ -1,12 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { DrawFlow } from "@/components/DrawFlow";
-import { createChemiGuestDraw } from "@/api/client";
+import { createChemiGuestDraw, getMyGuestDrawSlug } from "@/api/client";
 
 export default function ChemiGuestPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  // 이 브라우저가 이 host 링크로 이미 한 번 뽑았다면 다시 뽑게 하지 않고 그때 결과로 바로 보낸다.
+  useEffect(() => {
+    const existingGuestSlug = getMyGuestDrawSlug(slug);
+    if (existingGuestSlug) {
+      router.replace(`/chemi/${slug}/vs/${existingGuestSlug}`);
+      return;
+    }
+    setReady(true);
+  }, [slug, router]);
+
+  if (!ready) return null;
 
   return (
     <DrawFlow
