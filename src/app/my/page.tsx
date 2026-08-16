@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, GhostButton, Icon, Starfield, TopBar } from "@/components/primitives";
-import { getCurrentUser, listMyFortunes, logout, updateMe } from "@/api/client";
-import type { FortuneSummary, Topic, User } from "@/types";
+import { CardFace } from "@/components/TarotCard";
+import { getCurrentUser, listMyChemiDraws, listMyFortunes, logout, updateMe } from "@/api/client";
+import type { ChemiSummary, FortuneSummary, Topic, User } from "@/types";
 
 const TOPIC_LABEL: Record<Topic, string> = {
   COMPREHENSIVE: "종합운",
@@ -14,10 +15,14 @@ const TOPIC_LABEL: Record<Topic, string> = {
   WEALTH: "재물운",
 };
 
+type RecordTab = "chemi" | "fortune";
+
 export default function MyPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [rows, setRows] = useState<FortuneSummary[] | null>(null);
+  const [tab, setTab] = useState<RecordTab>("chemi");
+  const [chemiRows, setChemiRows] = useState<ChemiSummary[] | null>(null);
+  const [fortuneRows, setFortuneRows] = useState<FortuneSummary[] | null>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -30,8 +35,11 @@ export default function MyPage() {
     }
     setUser(u);
     setDraft(u.nickname);
+    listMyChemiDraws().then((res) => {
+      if (res.success && res.data) setChemiRows(res.data);
+    });
     listMyFortunes().then((res) => {
-      if (res.success && res.data) setRows(res.data);
+      if (res.success && res.data) setFortuneRows(res.data);
     });
   }, [router]);
 
@@ -90,31 +98,67 @@ export default function MyPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <span style={{ fontSize: "var(--text-caption)", color: "var(--text-muted)" }}>내 기록</span>
-          {rows?.length === 0 && (
-            <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-body)", textAlign: "center", marginTop: 20 }}>
-              아직 뽑은 카드가 없어요.
-            </p>
+
+          <div className="tab-row">
+            <button className={"tab-btn" + (tab === "chemi" ? " active" : "")} onClick={() => setTab("chemi")}>
+              <Icon name="heart" size={15} />
+              케미 뽑기
+            </button>
+            <button className={"tab-btn" + (tab === "fortune" ? " active" : "")} onClick={() => setTab("fortune")}>
+              <Icon name="moon" size={15} />
+              개인 카드 뽑기
+            </button>
+          </div>
+
+          {tab === "chemi" ? (
+            <>
+              {chemiRows?.length === 0 && (
+                <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-body)", textAlign: "center", marginTop: 20 }}>
+                  아직 뽑은 케미가 없어요.
+                </p>
+              )}
+              {chemiRows?.map((c) => (
+                <Link key={c.slug} href={`/chemi/${c.slug}`} className="progress-list-row" style={{ textDecoration: "none", color: "inherit" }}>
+                  <CardFace name={c.card.nameKr} reversed={c.isReversed} compact width={40} height={56} />
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontSize: "var(--text-body)" }}>{c.card.nameKr}</span>
+                    <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>
+                      {new Date(c.createdAt).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })}
+                    </span>
+                  </div>
+                  <Icon name="chevronRight" size={18} color="var(--text-muted)" />
+                </Link>
+              ))}
+            </>
+          ) : (
+            <>
+              {fortuneRows?.length === 0 && (
+                <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-body)", textAlign: "center", marginTop: 20 }}>
+                  아직 뽑은 카드가 없어요.
+                </p>
+              )}
+              {fortuneRows?.map((r) => (
+                <Link key={r.slug} href={`/fortune/${r.slug}`} className="progress-list-row" style={{ textDecoration: "none", color: "inherit" }}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 56,
+                      borderRadius: 10,
+                      background: "linear-gradient(135deg,var(--lavender-300),var(--pink-accent))",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontSize: "var(--text-body)" }}>{r.cards.map((c) => c.card.nameKr).join(" · ")}</span>
+                    <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>
+                      {new Date(r.createdAt).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })} · {TOPIC_LABEL[r.topic]}
+                    </span>
+                  </div>
+                  <Icon name="chevronRight" size={18} color="var(--text-muted)" />
+                </Link>
+              ))}
+            </>
           )}
-          {rows?.map((r) => (
-            <Link key={r.slug} href={`/fortune/${r.slug}`} className="progress-list-row" style={{ textDecoration: "none", color: "inherit" }}>
-              <div
-                style={{
-                  width: 40,
-                  height: 56,
-                  borderRadius: 10,
-                  background: "linear-gradient(135deg,var(--lavender-300),var(--pink-accent))",
-                  flexShrink: 0,
-                }}
-              />
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: "var(--text-body)" }}>{r.cards.map((c) => c.card.nameKr).join(" · ")}</span>
-                <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>
-                  {new Date(r.createdAt).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })} · {TOPIC_LABEL[r.topic]}
-                </span>
-              </div>
-              <Icon name="chevronRight" size={18} color="var(--text-muted)" />
-            </Link>
-          ))}
         </div>
 
         <GhostButton
