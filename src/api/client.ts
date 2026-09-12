@@ -170,25 +170,6 @@ export async function createChemiGuestDraw(hostSlug: string, nickname: string): 
   return res;
 }
 
-/**
- * 백엔드엔 host+guest를 한 번에 묶어 조회하는 엔드포인트가 따로 없다 — 게스트 자신의
- * GET /chemi-draws/{guestSlug} 응답에 이미 hostDraw/chemi가 함께 들어있어서 그걸 재조합한다.
- * hostSlug 파라미터는 라우트 형태를 유지하려고 남겨뒀을 뿐 실제 조회에는 쓰지 않는다.
- */
-export async function getChemiVs(_hostSlug: string, guestSlug: string): Promise<ApiResponse<ChemiGuestResponse>> {
-  const res = await apiFetch<ChemiDraw>(`/chemi-draws/${guestSlug}`);
-  const guestDraw = res.data;
-  if (!res.success || !guestDraw || !guestDraw.hostDraw || !guestDraw.chemi) {
-    return {
-      success: false,
-      data: null,
-      error: { code: "CHEMI_DRAW_NOT_FOUND", message: "존재하지 않는 케미 결과예요." },
-      meta: null,
-    };
-  }
-  return { success: true, data: { guestDraw, hostDraw: guestDraw.hostDraw, chemi: guestDraw.chemi }, error: null, meta: null };
-}
-
 export function getChemiRanking(hostSlug: string, page = 1, size = 20): Promise<ApiResponse<ChemiRankingEntry[]>> {
   return apiFetch<ChemiRankingEntry[]>(`/chemi-draws/${hostSlug}/ranking?page=${page}&size=${size}`);
 }
