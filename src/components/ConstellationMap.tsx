@@ -85,6 +85,26 @@ export function ConstellationMap({ entries }: { entries: ChemiRankingEntry[] }) 
               title={`${n.name} · ${n.score}점`}
             />
           ))}
+          {layout.nodes.map((n, i) => (
+            // 별자리 그룹 뱃지(예: "상극 1")만으로는 누가 어느 별인지 안 보여서, 별마다 이름을 바로 밑에 표시한다.
+            // 게스트 이름을 6자로 제한해뒀기 때문에(chemi guest 진입 화면) 좁은 자리에서도 줄바꿈 없이 들어간다.
+            <span
+              key={`label-${i}`}
+              style={{
+                position: "absolute",
+                left: n.x,
+                top: n.y + 8,
+                transform: "translate(-50%, 0)",
+                fontSize: 9,
+                color: "var(--text-secondary)",
+                whiteSpace: "nowrap",
+                textShadow: "0 1px 2px rgba(0,0,0,0.7)",
+                pointerEvents: "none",
+              }}
+            >
+              {n.name}
+            </span>
+          ))}
           {layout.pills.map((p, i) => (
             <div key={i} className="constellation-pill badge-pill" style={{ left: p.x, top: p.y, fontSize: 10, padding: "3px 8px", borderColor: p.color }}>
               {p.label} {p.count}

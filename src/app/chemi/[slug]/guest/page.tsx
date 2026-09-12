@@ -1,20 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, GhostButton, Icon, Starfield, TopBar } from "@/components/primitives";
 import { ScoreLink } from "@/components/TarotCard";
 import { DrawFlow } from "@/components/DrawFlow";
-import { createChemiGuestDraw } from "@/api/client";
+import { LoadingState } from "@/components/LoadingState";
+import { createChemiGuestDraw, getChemiDraw, getMyGuestDrawSlug } from "@/api/client";
 import type { ChemiGuestResponse } from "@/types";
 
 export default function ChemiGuestPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
+  const [checking, setChecking] = useState(true);
   const [result, setResult] = useState<ChemiGuestResponse | null>(null);
 
-  // 뽑기 직후 별도 페이지로 이동하지 않고, 같은 화면에서 바로 결과(방장과의 케미)를 보여준다.
+  // 이 브라우저가 이 host 링크로 이미 한 번 뽑았다면 다시 뽑게 하지 않고 그때 결과를 바로 보여준다.
+  useEffect(() => {
+    let active = true;
+    const existingGuestSlug = getMyGuestDrawSlug(slug);
+    if (!existingGuestSlug) {
+      setChecking(false);
+      return;
+    }
+    getChemiDraw(existingGuestSlug).then((res) => {
+      if (!active) return;
+      if (res.success && res.data && res.data.hostDraw && res.data.chemi) {
+        setResult({ guestDraw: res.data, hostDraw: res.data.hostDraw, chemi: res.data.chemi });
+      }
+      setChecking(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (checking) return <LoadingState message="불러오는 중이에요…" />;
+
+  // 뽑기 직후(또는 재방문 시) 별도 페이지로 이동하지 않고, 같은 화면에서 바로 결과(방장과의 케미)를 보여준다.
   if (result) {
     return (
       <div className="screen">
@@ -50,8 +74,9 @@ export default function ChemiGuestPage() {
 
   return (
     <DrawFlow
-      description="케미 결과에 표시될 이름이에요."
+      description="케미 결과에 표시될 이름이에요. 순위/별자리 화면에 짧게 표시돼서 6자까지만 입력할 수 있어요."
       drawHint="카드를 탭해서 골라보세요"
+      nameMaxLength={6}
       onBack={() => router.push(`/chemi/${slug}`)}
       onSubmit={async (name) => {
         const res = await createChemiGuestDraw(slug, name);

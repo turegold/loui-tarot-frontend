@@ -26,6 +26,8 @@ const KEYS = {
   accessToken: "loui-tarot:accessToken",
   refreshToken: "loui-tarot:refreshToken",
   ownedChemiSlugs: "loui-tarot:ownedChemiSlugs",
+  /** hostSlug -> 이 브라우저가 그 host에게 이미 뽑아준 guestSlug. 같은 링크로 재방문 시 재사용. */
+  guestDrawByHost: "loui-tarot:guestDrawByHost",
 } as const;
 
 function readStore<T>(key: string, fallback: T): T {
@@ -150,6 +152,17 @@ export function isOwnedChemiSlug(slug: string): boolean {
   return readStore<string[]>(KEYS.ownedChemiSlugs, []).includes(slug);
 }
 
+/** 이 브라우저가 이 hostSlug에 이미 게스트로 참여했다면 그때 만든 guestSlug, 아니면 null. */
+export function getMyGuestDrawSlug(hostSlug: string): string | null {
+  const map = readStore<Record<string, string>>(KEYS.guestDrawByHost, {});
+  return map[hostSlug] ?? null;
+}
+
+function rememberGuestDraw(hostSlug: string, guestSlug: string) {
+  const map = readStore<Record<string, string>>(KEYS.guestDrawByHost, {});
+  writeStore(KEYS.guestDrawByHost, { ...map, [hostSlug]: guestSlug });
+}
+
 export async function createChemiDraw(): Promise<ApiResponse<ChemiDraw>> {
   const res = await apiFetch<ChemiDraw>("/chemi-draws", { method: "POST" });
   if (res.success && res.data) markOwned(res.data.slug);
@@ -165,8 +178,12 @@ export async function createChemiGuestDraw(hostSlug: string, nickname: string): 
     method: "POST",
     body: JSON.stringify({ nickname }),
   });
-  // 게스트도 자기 draw의 "방장"이 될 수 있어야 확산 구조가 성립한다 (B가 C를 초대)
-  if (res.success && res.data) markOwned(res.data.guestDraw.slug);
+  if (res.success && res.data) {
+    // 게스트도 자기 draw의 "방장"이 될 수 있어야 확산 구조가 성립한다 (B가 C를 초대)
+    markOwned(res.data.guestDraw.slug);
+    // 같은 host 링크로 재방문했을 때 다시 뽑지 않고 이전 결과로 보내기 위해 기억해둔다.
+    rememberGuestDraw(hostSlug, res.data.guestDraw.slug);
+  }
   return res;
 }
 
