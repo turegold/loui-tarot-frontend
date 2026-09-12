@@ -119,7 +119,7 @@ export default function MyPage() {
               )}
               {chemiRows?.map((c) => (
                 <Link key={c.slug} href={`/chemi/${c.slug}`} className="progress-list-row" style={{ textDecoration: "none", color: "inherit" }}>
-                  <CardFace name={c.card.nameKr} reversed={c.isReversed} compact width={40} height={56} />
+                  <CardFace name={c.card.nameKr} imageUrl={c.card.imageUrl} reversed={c.isReversed} compact width={40} />
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
                     <span style={{ fontSize: "var(--text-body)" }}>{c.card.nameKr}</span>
                     <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>

@@ -75,7 +75,7 @@ export default function FortuneResultPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>
           {result.cards.map((slot, i) => (
             <div key={i} className="card-glass" style={{ padding: 16, display: "flex", gap: 14, alignItems: "flex-start" }}>
-              <CardFace name={slot.card.nameKr} reversed={slot.isReversed} compact width={72} height={100} />
+              <CardFace name={slot.card.nameKr} imageUrl={slot.card.imageUrl} reversed={slot.isReversed} compact width={72} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <span className="badge-pill" style={{ alignSelf: "flex-start" }}>
                   {slot.positionLabel}

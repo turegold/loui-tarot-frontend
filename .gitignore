@@ -38,6 +38,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# 카드 이미지 원본(고해상도) 작업 폴더 — public/cards에 리사이즈된 결과물만 커밋한다
+/imgs
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

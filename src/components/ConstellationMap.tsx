@@ -113,17 +113,18 @@ export function ConstellationMap({ entries }: { entries: ChemiRankingEntry[] }) 
         </div>
       </div>
       <p style={{ color: "var(--text-muted)", fontSize: "var(--text-caption)", textAlign: "center", maxWidth: 260 }}>
-        달에 가까울수록, 별이 밝을수록
-        <br />
-        나와 케미가 좋은 사람이에요
+        별이 밝을수록 나와 케미가 좋은 사람이에요
       </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", padding: "0 16px" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, width: "100%", padding: "0 4px" }}>
         {GROUP_META.map((g) => {
           const count = entries.filter((e) => chemiTier(e.score) === g.tier).length;
           return (
-            <span key={g.tier} className="badge-pill" style={{ borderColor: g.color }}>
-              {g.tier} {count}
-            </span>
+            <div key={g.tier} className="stat-box" style={{ borderColor: g.color }}>
+              <span className="stat-value" style={{ color: g.color }}>
+                {count}
+              </span>
+              <span className="stat-label">{g.tier}</span>
+            </div>
           );
         })}
       </div>

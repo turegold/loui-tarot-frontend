@@ -53,7 +53,7 @@ export default async function CardDetailPage({ params }: PageProps<"/card/[slug]
       <Starfield />
       <TopBar backHref="/" />
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "0 24px 40px", display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
-        <CardFace name={detail.nameKr} width={180} height={252} />
+        <CardFace name={detail.nameKr} imageUrl={detail.imageUrl} width={180} />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
           <span className="badge-pill">{detail.arcanaType === "MAJOR" ? `메이저 아르카나 ${detail.number}` : `마이너 아르카나 · ${suitLabel}`}</span>
           {detail.element && <span className="badge-pill">원소 · {ELEMENT_LABEL[detail.element]}</span>}
