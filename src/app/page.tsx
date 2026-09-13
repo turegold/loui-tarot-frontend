@@ -32,7 +32,13 @@ export default function OnboardingPage() {
           <Link href="/card" className="btn-text" style={{ textAlign: "center" }}>
             타로 카드 78장 의미 알아보기
           </Link>
-          <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>로그인 시 이용약관 및 개인정보 처리방침에 동의합니다</span>
+          <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>
+            로그인 시 이용약관 및{" "}
+            <Link href="/privacy" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
+              개인정보 처리방침
+            </Link>
+            에 동의합니다
+          </span>
         </div>
       </div>
     </div>

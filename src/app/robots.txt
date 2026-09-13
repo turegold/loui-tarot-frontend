@@ -1,0 +1,10 @@
+User-Agent: *
+Allow: /
+Disallow: /home
+Disallow: /my
+Disallow: /chemi/
+Disallow: /fortune/
+Disallow: /onboarding/
+Disallow: /login/
+
+Sitemap: https://www.watchy.site/sitemap.xml

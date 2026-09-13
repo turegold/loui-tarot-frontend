@@ -164,6 +164,9 @@ export default function MyPage() {
         <Link href="/card" className="btn-text" style={{ textAlign: "center" }}>
           타로 카드 사전 보기
         </Link>
+        <Link href="/privacy" className="btn-text" style={{ textAlign: "center" }}>
+          개인정보 처리방침
+        </Link>
 
         <GhostButton
           onClick={async () => {
