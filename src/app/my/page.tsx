@@ -161,6 +161,10 @@ export default function MyPage() {
           )}
         </div>
 
+        <Link href="/card" className="btn-text" style={{ textAlign: "center" }}>
+          타로 카드 사전 보기
+        </Link>
+
         <GhostButton
           onClick={async () => {
             await logout();
