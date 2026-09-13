@@ -27,16 +27,26 @@ export function ChemiRankingSection({ rows }: { rows: ChemiRankingEntry[] | null
               <div className="avatar-circle" style={{ width: 36, height: 36, fontSize: "var(--text-caption)", flexShrink: 0 }}>
                 {r.guestNickname.slice(0, 1)}
               </div>
-              <span style={{ fontSize: "var(--text-body)", flexShrink: 0 }}>
+              <span
+                style={{
+                  fontSize: "var(--text-body)",
+                  flex: "1 1 auto",
+                  minWidth: 0,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
                 {r.guestNickname} <span style={{ color: "var(--text-muted)" }}>- {r.guestCard.nameKr} 카드</span>
               </span>
-              <div style={{ flex: 1 }} />
               <img
                 src={r.guestCard.imageUrl}
                 alt={r.guestCard.nameKr}
                 style={{ width: 30, height: 52, objectFit: "contain", borderRadius: 6, background: "var(--bg-card-strong)", flexShrink: 0 }}
               />
-              <span className="badge-pill">{r.score}점</span>
+              <span className="badge-pill" style={{ flexShrink: 0 }}>
+                {r.score}점
+              </span>
             </div>
           ))}
         </div>
