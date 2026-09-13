@@ -1,52 +1,74 @@
+import http from "node:http";
+import https from "node:https";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Blobs, Icon, Starfield, TopBar } from "@/components/primitives";
 import { CardFace } from "@/components/TarotCard";
-import type { Card, CardDetail, Element } from "@/types";
+import { CARDS, getCardBySlug } from "@/data/cards";
+import type { CardDetail, Element } from "@/types";
 
 const ELEMENT_LABEL: Record<Element, string> = { FIRE: "불", WATER: "물", AIR: "공기", EARTH: "흙" };
 
 // 서버 컴포넌트(빌드 타임/요청 시 Node.js에서 실행)라 브라우저 전용 client.ts를 쓰지 않고 직접 fetch한다.
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1";
 
-// 정적 export에서 이 라우트는 generateStaticParams로 이미 완전히 정적이라 { cache: "no-store" }
-// (=revalidate:0, "항상 새로 가져와야 함")를 쓰면 특히 generateMetadata 안에서 정적 렌더링과
-// 충돌해 빌드가 실패한다(NEXT_STATIC_GEN_BAILOUT). 빌드 타임에 한 번만 가져오면 되므로
-// 기본 캐싱 그대로 둔다.
-async function fetchCards(): Promise<Card[]> {
-  try {
-    const res = await fetch(`${API_BASE}/cards`);
-    if (!res.ok) return [];
-    const body = await res.json();
-    return body.data ?? [];
-  } catch {
-    return [];
-  }
+// 78장 카드 목록(id/nameKr/seoSlug 등)은 로컬 카탈로그(@/data/cards)가 백엔드 시드와 완전히
+// 동일한 값을 만들어내므로, 슬러그↔ID 매핑에는 네트워크가 전혀 필요 없다. 실제 API는
+// 카드별 해석 텍스트(fetchCardDetail)를 가져올 때만 부른다.
+
+// Node의 전역 fetch(undici)로 api.watchy.site(Nginx+Let's Encrypt, TLS 1.3)에 붙으면
+// ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC로 100% 재현되는 게 확인됐다 — 동시성/재시도
+// 문제가 아니라 순차 요청 1건도 실패했고, curl이나 같은 호스트의 다른 정적 파일(CloudFront)은
+// 멀쩡했다. TLS 1.2로 강제하면 즉시 해결되는 것도 확인했다 — Node fetch(undici)와 이
+// 서버의 TLS 1.3 협상 사이의 호환성 문제로 보인다. 이 빌드는 로컬뿐 아니라 GitHub Actions
+// CI에서도 똑같이 이 백엔드로 붙으므로, Nginx 쪽에서 TLS 1.3을 끄는 대신(실사용자 브라우저
+// 트래픽까지 영향) 이 빌드 스크립트만 TLS 1.2로 붙게 한다.
+function fetchJson(url: string): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const isHttps = url.startsWith("https:");
+    const client = isHttps ? https : http;
+    const options = isHttps ? { maxVersion: "TLSv1.2" as const } : {};
+    client
+      .get(url, options, (res) => {
+        if (!res.statusCode || res.statusCode >= 400) {
+          res.resume();
+          reject(new Error(`HTTP ${res.statusCode}`));
+          return;
+        }
+        let data = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(e);
+          }
+        });
+      })
+      .on("error", reject);
+  });
 }
 
 async function fetchCardDetail(id: number): Promise<CardDetail | null> {
   try {
-    const res = await fetch(`${API_BASE}/cards/${id}`);
-    if (!res.ok) return null;
-    const body = await res.json();
+    const body = (await fetchJson(`${API_BASE}/cards/${id}`)) as { data?: CardDetail };
     return body.data ?? null;
   } catch {
     return null;
   }
 }
 
-export async function generateStaticParams() {
-  const cards = await fetchCards();
-  return cards.map((c) => ({ slug: c.seoSlug }));
+export function generateStaticParams() {
+  return CARDS.map((c) => ({ slug: c.seoSlug }));
 }
 
 // 카드마다 다른 title/description을 줘야 검색엔진이 78개 페이지를 서로 다른 콘텐츠로 본다 —
 // 전부 같은 제목이면 사실상 중복 페이지로 취급될 수 있다.
 export async function generateMetadata({ params }: PageProps<"/card/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const cards = await fetchCards();
-  const summary = cards.find((c) => c.seoSlug === slug);
+  const summary = getCardBySlug(slug);
   if (!summary) return {};
 
   const title = `${summary.nameKr} 카드 의미 - 정방향/역방향 해석`;
@@ -61,8 +83,7 @@ export async function generateMetadata({ params }: PageProps<"/card/[slug]">): P
 
 export default async function CardDetailPage({ params }: PageProps<"/card/[slug]">) {
   const { slug } = await params;
-  const cards = await fetchCards();
-  const summary = cards.find((c) => c.seoSlug === slug);
+  const summary = getCardBySlug(slug);
   if (!summary) notFound();
 
   const detail = await fetchCardDetail(summary.id);
