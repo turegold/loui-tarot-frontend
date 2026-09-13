@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Blobs, GhostButton, Icon, Starfield, TopBar } from "@/components/primitives";
+import { Blobs, Icon, Starfield, TopBar } from "@/components/primitives";
 import { ScoreLink } from "@/components/TarotCard";
 import { DrawFlow } from "@/components/DrawFlow";
 import { LoadingState } from "@/components/LoadingState";
-import { createChemiGuestDraw, getChemiDraw, getMyGuestDrawSlug } from "@/api/client";
+import { CopyShareButton } from "@/components/CopyShareButton";
+import { ChemiRankingSection } from "@/components/ChemiRankingSection";
+import { createChemiGuestDraw, getChemiDraw, getChemiRanking, getMyGuestDrawSlug } from "@/api/client";
 import { useUrlSlug } from "@/utils/useUrlSlug";
-import type { ChemiGuestResponse } from "@/types";
+import type { ChemiGuestResponse, ChemiRankingEntry } from "@/types";
 
 export function ChemiGuestClient() {
   const slug = useUrlSlug(2);
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [result, setResult] = useState<ChemiGuestResponse | null>(null);
+  const [ranking, setRanking] = useState<ChemiRankingEntry[] | null>(null);
 
   // 이 브라우저가 이 host 링크로 이미 한 번 뽑았다면 다시 뽑게 하지 않고 그때 결과를 바로 보여준다.
   useEffect(() => {
@@ -38,6 +40,20 @@ export function ChemiGuestClient() {
     };
   }, [slug]);
 
+  // 이 host의 케미 순위 — 게스트가 "케미 순위 보기"로 별도 이동하지 않고 자기 결과 화면에
+  // 이어서 바로 볼 수 있게 한다. /chemi/{slug}로 이동시키면 이미 뽑은 게스트는 그 페이지에서
+  // 곧바로 이 guest 페이지로 되돌려보내는 로직과 충돌해 제자리로 튕겨오기만 했다.
+  useEffect(() => {
+    if (!slug) return;
+    let active = true;
+    getChemiRanking(slug).then((res) => {
+      if (active && res.success && res.data) setRanking(res.data);
+    });
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
   if (checking) return <LoadingState message="불러오는 중이에요…" />;
 
   // 뽑기 직후(또는 재방문 시) 별도 페이지로 이동하지 않고, 같은 화면에서 바로 결과(방장과의 케미)를 보여준다.
@@ -46,7 +62,7 @@ export function ChemiGuestClient() {
       <div className="screen">
         <Blobs />
         <Starfield />
-        <TopBar onBack={() => router.push(`/chemi/${slug}`)} />
+        <TopBar backHref="/" />
         <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "0 20px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <span className="badge-pill">
             <Icon name="star" size={13} />
@@ -61,14 +77,9 @@ export function ChemiGuestClient() {
             <p style={{ fontSize: "var(--text-body)", lineHeight: 1.6, color: "var(--text-secondary)" }}>{result.chemi.interpretation}</p>
           </div>
           <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
-            {/* 게스트 본인 draw도 소유가 등록돼있어 이 링크로 들어가면 자신의 방장 화면(공유 CTA)이 뜬다 */}
-            <Link href={`/chemi/${result.guestDraw.slug}`} className="btn-primary">
-              <Icon name="sparkle" size={18} color="#fff" />
-              내 케미 링크 공유하기
-            </Link>
-            {/* 순위는 별도 페이지가 아니라 방장 결과 화면(chemi/[slug])에 이어서 보인다 */}
-            <GhostButton onClick={() => router.push(`/chemi/${slug}`)}>케미 순위 보기</GhostButton>
+            <CopyShareButton url={result.guestDraw.shareUrl} label="내 케미 링크 공유하기" />
           </div>
+          <ChemiRankingSection rows={ranking} />
         </div>
       </div>
     );
@@ -85,6 +96,10 @@ export function ChemiGuestClient() {
         const res = await createChemiGuestDraw(slug!, name);
         if (res.success && res.data) {
           setResult(res.data);
+          // 방금 뽑은 내 결과가 순위표에도 바로 반영되도록 다시 불러온다.
+          getChemiRanking(slug!).then((r) => {
+            if (r.success && r.data) setRanking(r.data);
+          });
           return;
         }
         return res.error?.message ?? "뽑기에 실패했어요.";
