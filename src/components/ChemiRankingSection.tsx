@@ -27,18 +27,22 @@ export function ChemiRankingSection({ rows }: { rows: ChemiRankingEntry[] | null
               <div className="avatar-circle" style={{ width: 36, height: 36, fontSize: "var(--text-caption)", flexShrink: 0 }}>
                 {r.guestNickname.slice(0, 1)}
               </div>
-              <span
-                style={{
-                  fontSize: "var(--text-body)",
-                  flex: "1 1 auto",
-                  minWidth: 0,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {r.guestNickname} <span style={{ color: "var(--text-muted)" }}>- {r.guestCard.nameKr} 카드</span>
-              </span>
+              <div style={{ flex: "1 1 auto", minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+                <span style={{ fontSize: "var(--text-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {r.guestNickname}
+                </span>
+                <span
+                  style={{
+                    fontSize: "var(--text-caption)",
+                    color: "var(--text-muted)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {r.guestCard.nameKr} 카드
+                </span>
+              </div>
               <img
                 src={r.guestCard.imageUrl}
                 alt={r.guestCard.nameKr}
