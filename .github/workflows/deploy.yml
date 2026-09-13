@@ -1,0 +1,47 @@
+name: Deploy to S3 + CloudFront
+
+# develop에 push되면: 정적 export로 빌드해서 S3에 동기화하고, CloudFront 캐시를 무효화한다.
+# NEXT_PUBLIC_* 값은 빌드 타임에 번들에 그대로 박히므로 .env.production을 커밋해서 쓴다(시크릿 아님).
+on:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # /card/[slug]가 빌드 타임에 백엔드에서 카드 78종을 가져와 정적으로 미리 렌더링하므로,
+      # 이 시점에 백엔드(EC2:8080)가 살아있고 퍼블릭에서 접근 가능해야 빌드가 성공한다.
+      - name: Build (static export)
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Sync to S3
+        run: aws s3 sync out/ "s3://${{ secrets.S3_BUCKET }}" --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*"
