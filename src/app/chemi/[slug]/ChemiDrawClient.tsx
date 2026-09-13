@@ -46,17 +46,22 @@ export function ChemiDrawClient() {
     };
   }, [slug, router]);
 
-  // 케미 순위는 카드 결과와 독립적으로 불러온다 — 이 slug가 방장으로 쓰인 적 없으면 빈 목록으로 온다.
+  // 케미 순위는 화면 위쪽 비교 결과와 짝을 맞춘다 — 이 draw가 게스트로서 이미 어떤 host와
+  // 매칭됐다면(hostDraw/chemi 있음) 그 host의 순위표를, 매칭 전(진짜 방장 draw)이라면
+  // 이 draw 자신의 순위표를 보여준다. 예: A의 host draw에 B가 게스트로 뽑아 AxB 매칭이
+  // 생겼다면, B의 공유 링크를 열어도 "A의 순위"가 나와야지 이제 막 생긴 B 자신의(거의
+  // 항상 비어 있는) 순위표가 나오면 안 된다.
   useEffect(() => {
-    if (!slug) return;
+    if (!draw) return;
+    const rankingSlug = draw.hostDraw && draw.chemi ? draw.hostDraw.slug : draw.slug;
     let active = true;
-    getChemiRanking(slug).then((res) => {
+    getChemiRanking(rankingSlug).then((res) => {
       if (active && res.success && res.data) setRanking(res.data);
     });
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [draw]);
 
   if (notFound) {
     return (
