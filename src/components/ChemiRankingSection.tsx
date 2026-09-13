@@ -33,7 +33,7 @@ export function ChemiRankingSection({ rows }: { rows: ChemiRankingEntry[] | null
                 </span>
                 <span
                   style={{
-                    fontSize: "var(--text-caption)",
+                    fontSize: "var(--text-micro)",
                     color: "var(--text-muted)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
