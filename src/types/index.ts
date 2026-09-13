@@ -20,6 +20,14 @@ export interface Card {
 export interface CardDetail extends Card {
   uprightInterpretation: string;
   reversedInterpretation: string;
+  uprightKeyword: string;
+  reversedKeyword: string;
+  uprightLoveInterpretation: string;
+  uprightCareerInterpretation: string;
+  uprightWealthInterpretation: string;
+  reversedLoveInterpretation: string;
+  reversedCareerInterpretation: string;
+  reversedWealthInterpretation: string;
 }
 
 /**

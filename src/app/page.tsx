@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Blobs, DeckCardBack, KakaoButton, Starfield } from "@/components/primitives";
 
 function kakaoLoginUrl(): string {
@@ -28,6 +29,9 @@ export default function OnboardingPage() {
         <div style={{ flex: 1 }} />
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
           <KakaoButton onClick={() => window.location.assign(kakaoLoginUrl())}>카카오로 시작하기</KakaoButton>
+          <Link href="/card" className="btn-text" style={{ textAlign: "center" }}>
+            타로 카드 78장 의미 알아보기
+          </Link>
           <span style={{ fontSize: "var(--text-micro)", color: "var(--text-muted)" }}>로그인 시 이용약관 및 개인정보 처리방침에 동의합니다</span>
         </div>
       </div>
