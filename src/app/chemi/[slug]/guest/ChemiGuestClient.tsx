@@ -1,23 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, GhostButton, Icon, Starfield, TopBar } from "@/components/primitives";
 import { ScoreLink } from "@/components/TarotCard";
 import { DrawFlow } from "@/components/DrawFlow";
 import { LoadingState } from "@/components/LoadingState";
 import { createChemiGuestDraw, getChemiDraw, getMyGuestDrawSlug } from "@/api/client";
+import { useUrlSlug } from "@/utils/useUrlSlug";
 import type { ChemiGuestResponse } from "@/types";
 
 export function ChemiGuestClient() {
-  const { slug } = useParams<{ slug: string }>();
+  const slug = useUrlSlug(2);
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [result, setResult] = useState<ChemiGuestResponse | null>(null);
 
   // 이 브라우저가 이 host 링크로 이미 한 번 뽑았다면 다시 뽑게 하지 않고 그때 결과를 바로 보여준다.
   useEffect(() => {
+    if (!slug) return;
     let active = true;
     const existingGuestSlug = getMyGuestDrawSlug(slug);
     if (!existingGuestSlug) {
@@ -79,7 +81,8 @@ export function ChemiGuestClient() {
       nameMaxLength={6}
       onBack={() => router.push(`/chemi/${slug}`)}
       onSubmit={async (name) => {
-        const res = await createChemiGuestDraw(slug, name);
+        // checking이 false가 된 시점엔 이미 slug가 resolve된 뒤라 null일 수 없다.
+        const res = await createChemiGuestDraw(slug!, name);
         if (res.success && res.data) {
           setResult(res.data);
           return;

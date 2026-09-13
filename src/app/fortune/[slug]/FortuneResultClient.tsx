@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Blobs, GhostButton, Icon, PrimaryButton, Starfield, TopBar } from "@/components/primitives";
 import { CardFace } from "@/components/TarotCard";
 import { LoadingState } from "@/components/LoadingState";
 import { getFortune } from "@/api/client";
+import { useUrlSlug } from "@/utils/useUrlSlug";
 import type { FortuneResult, Topic } from "@/types";
 
 const TOPIC_META: Record<Topic, { icon: string; title: string }> = {
@@ -17,13 +18,14 @@ const TOPIC_META: Record<Topic, { icon: string; title: string }> = {
 };
 
 export function FortuneResultClient() {
-  const { slug } = useParams<{ slug: string }>();
+  const slug = useUrlSlug(2);
   const router = useRouter();
   const [result, setResult] = useState<FortuneResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    if (!slug) return;
     let active = true;
     getFortune(slug).then((res) => {
       if (!active) return;
@@ -38,7 +40,7 @@ export function FortuneResultClient() {
   if (notFound) {
     return (
       <div className="screen" style={{ alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center", gap: 12 }}>
-        <p style={{ color: "var(--text-secondary)" }}>존재하지 않는 결과예요.</p>
+        <p style={{ color: "var(--text-secondary)" }}>결과를 찾을 수 없어요.</p>
         <Link href="/" className="btn-text">
           홈으로 돌아가기
         </Link>
