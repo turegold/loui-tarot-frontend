@@ -8,6 +8,7 @@ import { CardFace } from "@/components/TarotCard";
 import { LoadingState } from "@/components/LoadingState";
 import { CopyShareButton } from "@/components/CopyShareButton";
 import { ChemiRankingSection } from "@/components/ChemiRankingSection";
+import { ChemiMatchResult } from "@/components/ChemiMatchResult";
 import { getChemiDraw, getChemiRanking, getMyGuestDrawSlug, isOwnedChemiSlug } from "@/api/client";
 import { useUrlSlug } from "@/utils/useUrlSlug";
 import type { ChemiDraw, ChemiRankingEntry } from "@/types";
@@ -70,7 +71,13 @@ export function ChemiDrawClient() {
 
   if (!draw) return <LoadingState message="불러오는 중이에요…" />;
 
-  // 방장 본인 — 자신의 결과 + 공유 CTA + 케미 순위까지 한 화면에 이어서 보여준다
+  // 이 draw가 (게스트로서) 다른 방장과 이미 케미 비교를 마친 적 있다면 hostDraw/chemi가
+  // 채워져 있으니, 누가 이 링크를 보든(본인이든 공유받은 사람이든) 그 비교 결과(둘의
+  // 카드+점수)를 보여준다 — "내 케미 링크 공유하기"로 공유했을 때 상대방이 자기 카드만
+  // 덩그러니 보게 되는 걸 막기 위함이다.
+  const matched = draw.hostDraw && draw.chemi ? { host: draw.hostDraw, chemi: draw.chemi } : null;
+
+  // 방장 본인 — 자신의 결과 + 공유 CTA + 케미 순위까지 한 화면에 이어서 보여준다.
   if (isOwner) {
     return (
       <div className="screen">
@@ -78,11 +85,26 @@ export function ChemiDrawClient() {
         <Starfield />
         <TopBar backHref="/home" />
         <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "0 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <span className="badge-pill">{draw.nickname}님의 카드</span>
-          <CardFace name={draw.card.nameKr} imageUrl={draw.card.imageUrl} reversed={draw.isReversed} />
-          <div className="card-glass" style={{ padding: 20, width: "100%", marginTop: 8 }}>
-            <p style={{ fontSize: "var(--text-body)", lineHeight: 1.6, color: "var(--text-secondary)" }}>{draw.interpretation}</p>
-          </div>
+          {matched ? (
+            <ChemiMatchResult
+              leftNickname={matched.host.nickname}
+              leftCard={matched.host.card}
+              leftReversed={matched.host.isReversed}
+              rightNickname={draw.nickname}
+              rightCard={draw.card}
+              rightReversed={draw.isReversed}
+              score={matched.chemi.score}
+              interpretation={matched.chemi.interpretation}
+            />
+          ) : (
+            <>
+              <span className="badge-pill">{draw.nickname}님의 카드</span>
+              <CardFace name={draw.card.nameKr} imageUrl={draw.card.imageUrl} reversed={draw.isReversed} />
+              <div className="card-glass" style={{ padding: 20, width: "100%", marginTop: 8 }}>
+                <p style={{ fontSize: "var(--text-body)", lineHeight: 1.6, color: "var(--text-secondary)" }}>{draw.interpretation}</p>
+              </div>
+            </>
+          )}
           <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
             <CopyShareButton url={draw.shareUrl} />
           </div>
@@ -99,12 +121,27 @@ export function ChemiDrawClient() {
       <Starfield />
       <TopBar backHref="/" />
       <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "10px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16, textAlign: "center" }}>
-        <h2 style={{ fontSize: 22, marginTop: 8 }}>
-          {draw.nickname}님이
-          <br />
-          카드를 뽑았어요
-        </h2>
-        <CardFace name={draw.card.nameKr} imageUrl={draw.card.imageUrl} reversed={draw.isReversed} width={130} />
+        {matched ? (
+          <ChemiMatchResult
+            leftNickname={matched.host.nickname}
+            leftCard={matched.host.card}
+            leftReversed={matched.host.isReversed}
+            rightNickname={draw.nickname}
+            rightCard={draw.card}
+            rightReversed={draw.isReversed}
+            score={matched.chemi.score}
+            interpretation={matched.chemi.interpretation}
+          />
+        ) : (
+          <>
+            <h2 style={{ fontSize: 22, marginTop: 8 }}>
+              {draw.nickname}님이
+              <br />
+              카드를 뽑았어요
+            </h2>
+            <CardFace name={draw.card.nameKr} imageUrl={draw.card.imageUrl} reversed={draw.isReversed} width={130} />
+          </>
+        )}
         <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-body)" }}>
           카드를 뽑으면
           <br />

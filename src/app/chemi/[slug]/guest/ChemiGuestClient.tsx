@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Blobs, Icon, Starfield, TopBar } from "@/components/primitives";
-import { ScoreLink } from "@/components/TarotCard";
+import { Blobs, Starfield, TopBar } from "@/components/primitives";
 import { DrawFlow } from "@/components/DrawFlow";
 import { LoadingState } from "@/components/LoadingState";
 import { CopyShareButton } from "@/components/CopyShareButton";
 import { ChemiRankingSection } from "@/components/ChemiRankingSection";
+import { ChemiMatchResult } from "@/components/ChemiMatchResult";
 import { createChemiGuestDraw, getChemiDraw, getChemiRanking, getMyGuestDrawSlug } from "@/api/client";
 import { useUrlSlug } from "@/utils/useUrlSlug";
 import type { ChemiGuestResponse, ChemiRankingEntry } from "@/types";
@@ -64,18 +64,16 @@ export function ChemiGuestClient() {
         <Starfield />
         <TopBar backHref="/" />
         <div className="screen-scroll" style={{ position: "relative", zIndex: 1, padding: "0 20px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <span className="badge-pill">
-            <Icon name="star" size={13} />
-            {result.hostDraw.nickname} ✕ {result.guestDraw.nickname}
-          </span>
-          <ScoreLink
+          <ChemiMatchResult
+            leftNickname={result.hostDraw.nickname}
+            leftCard={result.hostDraw.card}
+            leftReversed={result.hostDraw.isReversed}
+            rightNickname={result.guestDraw.nickname}
+            rightCard={result.guestDraw.card}
+            rightReversed={result.guestDraw.isReversed}
             score={result.chemi.score}
-            left={{ name: result.hostDraw.card.nameKr, imageUrl: result.hostDraw.card.imageUrl, reversed: result.hostDraw.isReversed }}
-            right={{ name: result.guestDraw.card.nameKr, imageUrl: result.guestDraw.card.imageUrl, reversed: result.guestDraw.isReversed }}
+            interpretation={result.chemi.interpretation}
           />
-          <div className="card-glass" style={{ padding: 20, width: "100%" }}>
-            <p style={{ fontSize: "var(--text-body)", lineHeight: 1.6, color: "var(--text-secondary)" }}>{result.chemi.interpretation}</p>
-          </div>
           <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
             <CopyShareButton url={result.guestDraw.shareUrl} label="내 케미 링크 공유하기" />
           </div>
